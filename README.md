@@ -2,6 +2,8 @@
 
 # Autoresearch
 
+[한국어 README](README_kor.md) · [한국어 학습 가이드](guide/README.md#한국어-학습-경로) · [코드 아키텍처](docs/archify/README.md)
+
 **Turn [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [OpenCode](https://opencode.ai), or [OpenAI Codex](https://developers.openai.com/codex) into a relentless improvement engine.**
 
 Based on [Karpathy's autoresearch](https://github.com/karpathy/autoresearch) — constraint + mechanical metric + autonomous iteration = compounding gains.

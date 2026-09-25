@@ -1,0 +1,13 @@
+{
+  "goal": "Verify a synthetic change; offline fixture only",
+  "archetype": "fix-broken",
+  "predicate": "node --version",
+  "terminal_choice": "stop-at-verified",
+  "cycle": 1,
+  "units_remaining": [2, 0],
+  "pipeline_log": [],
+  "errors_remaining": 0,
+  "regression_verdict": "STABLE",
+  "untested_gaps": 0,
+  "pending_verify": true
+}

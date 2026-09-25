@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Autoresearch 실행 계약과 결정적 런타임",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/hundong2/autoresearch",
+      "revision": "050e30dc4ba0974b03f2873111b9901ec3211390"
+    },
+    "viewBox": [1320, 580]
+  },
+  "components": [
+    {
+      "id": "host-agent",
+      "type": "external",
+      "label": "호스트 에이전트",
+      "sublabel": "목표 확인 · 도구 실행",
+      "pos": [40, 100], "size": [210, 90],
+      "sources": [
+        {"path": ".claude/skills/autoresearch/SKILL.md", "line": 15, "end_line": 26, "label": "호스트 입력 분기"},
+        {"path": ".claude/skills/autoresearch/SKILL.md", "line": 77, "end_line": 92, "label": "확인과 실행 절차"}
+      ]
+    },
+    {
+      "id": "command-contracts",
+      "type": "backend",
+      "label": "스킬 · 명령 계약",
+      "sublabel": "Markdown 실행 지침",
+      "pos": [380, 100], "size": [210, 90],
+      "sources": [
+        {"path": ".claude/skills/autoresearch/SKILL.md", "line": 63, "end_line": 92, "label": "도우미 호출 지침"},
+        {"path": ".claude/commands/autoresearch.md", "line": 44, "end_line": 89, "label": "Classic 실험 계약"},
+        {"path": ".claude/commands/autoresearch/regression.md", "line": 72, "end_line": 78, "label": "회귀 점수 호출"}
+      ]
+    },
+    {
+      "id": "routing-runtime",
+      "type": "backend",
+      "label": "Orchestrator 도우미",
+      "sublabel": "Bash · 다음 작업 판정",
+      "pos": [720, 100], "size": [210, 90],
+      "sources": [
+        {"path": "scripts/orchestrate.sh", "line": 19, "end_line": 68, "label": "영어 키워드 분류"},
+        {"path": "scripts/orchestrate.sh", "line": 73, "end_line": 124, "label": "상태 기반 다음 작업"},
+        {"path": "scripts/orchestrate.sh", "line": 438, "end_line": 448, "label": "CLI dispatch"}
+      ]
+    },
+    {
+      "id": "state-ledger",
+      "type": "database",
+      "label": "상태 장부",
+      "sublabel": "JSON · pinned predicate",
+      "pos": [1060, 100], "size": [210, 90],
+      "sources": [
+        {"path": ".claude/skills/autoresearch/SKILL.md", "line": 94, "end_line": 107, "label": "장부 소유와 재개 규칙"},
+        {"path": "scripts/orchestrate.sh", "line": 392, "end_line": 436, "label": "JSON 검사와 재검사"}
+      ]
+    },
+    {
+      "id": "claude-hook-guards",
+      "type": "security",
+      "label": "Claude 보호 훅",
+      "sublabel": "Node.js · 오류 시 허용",
+      "pos": [40, 390], "size": [210, 90],
+      "sources": [
+        {"path": ".claude/hooks/autoresearch/hooks.json", "line": 19, "end_line": 38, "label": "Bash 이벤트 등록"},
+        {"path": ".claude/hooks/autoresearch/node-hook-runner.sh", "line": 1, "end_line": 17, "label": "Node 실행 wrapper"},
+        {"path": ".claude/hooks/autoresearch/dangerous-cmd-block.cjs", "line": 61, "end_line": 82, "label": "입력 검사와 fail-open"}
+      ]
+    },
+    {
+      "id": "regression-reducer",
+      "type": "backend",
+      "label": "회귀 점수 도우미",
+      "sublabel": "TSV → HARD / SCORE",
+      "pos": [380, 390], "size": [210, 90],
+      "sources": [
+        {"path": "scripts/score-regression.sh", "line": 100, "end_line": 141, "label": "15열 검증과 분류"},
+        {"path": "scripts/score-regression.sh", "line": 151, "end_line": 197, "label": "데이터 없음과 판정"}
+      ]
+    }
+  ],
+  "connections": [
+    {"id": "interpret-contract", "from": "host-agent", "to": "command-contracts", "label": "지침 해석", "variant": "emphasis"},
+    {"id": "invoke-routing", "from": "command-contracts", "to": "routing-runtime", "label": "CLI 지시", "variant": "emphasis"},
+    {"id": "read-state", "from": "routing-runtime", "to": "state-ledger", "label": "JSON 읽기"},
+    {"id": "hook-event", "from": "host-agent", "to": "claude-hook-guards", "label": "도구 이벤트", "variant": "security", "labelAt": [145, 204]},
+    {"id": "invoke-regression", "from": "command-contracts", "to": "regression-reducer", "label": "회귀 CLI 지시", "labelAt": [485, 204]}
+  ],
+  "cards": [
+    {"dot": "cyan", "title": "실행 주체 구별", "items": ["호스트가 변경 · 검증 · 기록을 조율", "Bash는 판정만 반환하며 LLM을 호출하지 않음"]},
+    {"dot": "amber", "title": "판정의 한계", "items": ["STABLE은 측정 범위의 비교 결과", "ship=yes는 사용자 승인이나 실제 배포가 아님"]},
+    {"dot": "rose", "title": "신뢰 경계", "items": ["저장된 predicate도 실행 전에 재검사", "Claude 훅은 샌드박스가 아니며 타 호스트와 다름"]}
+  ]
+}
